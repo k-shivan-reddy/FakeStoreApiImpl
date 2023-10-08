@@ -2,11 +2,13 @@ package dev.shivan.fakestoreimpl.controller;
 
 
 import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import dev.shivan.fakestoreimpl.dto.*;
+import dev.shivan.fakestoreimpl.exceptions.NotFoundException;
 import dev.shivan.fakestoreimpl.service.CategoryService;
 import java.util.List;
 
@@ -25,9 +27,11 @@ public class CategoryController {
         return categoryService.getAllCategory();
     }
 
-    @GetMapping
-    public List<ProductDto> getAllProductOfCategory(@PathVariable("name") String name)
+    @GetMapping("{name}")
+    public List<ProductDto> getAllProductOfCategory(@PathVariable("name") String name) throws NotFoundException
     {
+
         return categoryService.getProductsByCategory(name);
     }
+
 }

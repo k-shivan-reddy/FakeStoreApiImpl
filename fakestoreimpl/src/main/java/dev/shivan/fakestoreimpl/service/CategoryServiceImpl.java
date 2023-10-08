@@ -2,6 +2,7 @@ package dev.shivan.fakestoreimpl.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -9,7 +10,9 @@ import dev.shivan.fakestoreimpl.Model.Category;
 import dev.shivan.fakestoreimpl.Model.Product;
 import dev.shivan.fakestoreimpl.dto.CategoryDto;
 import dev.shivan.fakestoreimpl.dto.ProductDto;
+import dev.shivan.fakestoreimpl.exceptions.NotFoundException;
 import dev.shivan.fakestoreimpl.repository.CategoryRepository;
+import dev.shivan.fakestoreimpl.repository.ProductRepository;
 
 @Service
 public class CategoryServiceImpl implements CategoryService
@@ -19,10 +22,24 @@ public class CategoryServiceImpl implements CategoryService
                 categoryDto.setName(category.getName());
                 return categoryDto;
         }
+
+        public ProductDto convertProductToProductDto(Product product) {
+
+            ProductDto productDto = new ProductDto();
+            productDto.setImage(product.getImage());
+            productDto.setDescription(product.getDescription());
+            productDto.setTitle(product.getTitle());
+            productDto.setPrice(product.getPrice());
+            productDto.setCategory(product.getCategory().getName());
+            productDto.setId(product.getId());
+            return productDto;
+            }
             CategoryRepository categoryRepository;
-            CategoryServiceImpl(CategoryRepository categoryRepository)
+            ProductRepository productRepository;
+            CategoryServiceImpl(CategoryRepository categoryRepository,ProductRepository productRepository)
             {
                 this.categoryRepository = categoryRepository;
+                this.productRepository = productRepository;
             }
             @Override
             public List<CategoryDto> getAllCategory()
@@ -35,9 +52,21 @@ public class CategoryServiceImpl implements CategoryService
                 }
                 return listCategoryDtos;
             }
-            
-            public List<ProductDto> getProductsByCategory(String name)
+
+            public List<ProductDto> getProductsByCategory(String name) throws NotFoundException
             {
-                return null;
+
+                Optional<Category> categoryOptional = categoryRepository.getCategoryByName(name);
+                if(categoryOptional.isEmpty())
+                {
+                    throw new NotFoundException("Category with this name is not possible  :  "+name);
+                }
+                List<Product> listProducts = categoryOptional.get().getProducts();
+                List<ProductDto> listpProductDtos = new ArrayList<>();
+                for(Product product:listProducts)
+                {
+                    listpProductDtos.add(convertProductToProductDto(product));
+                }
+                return listpProductDtos;
             }
 }
